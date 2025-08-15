@@ -10,7 +10,7 @@ const submitRouter = require('./routes/submit')
 const cors = require('cors')
 
 app.use(cors({
-    origin:"*",
+    origin:process.env.BASEUSL,
     credentials:true
 }))
 
