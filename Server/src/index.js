@@ -10,7 +10,7 @@ const submitRouter = require('./routes/submit')
 const cors = require('cors')
 
 app.use(cors({
-    origin:"https://algo-league.vercel.app",
+    origin:"*",
     credentials:true
 }))
 
