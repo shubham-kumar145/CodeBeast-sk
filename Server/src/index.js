@@ -10,9 +10,14 @@ const submitRouter = require('./routes/submit')
 const cors = require('cors')
 
 app.use(cors({
-    origin:process.env.BASEUSL,
+    origin:process.env.BASEURL,
     credentials:true
 }))
+
+
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
 
 app.use(express.json());
 app.use(cookieParser())
