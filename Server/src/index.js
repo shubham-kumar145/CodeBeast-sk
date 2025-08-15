@@ -10,20 +10,22 @@ const submitRouter = require('./routes/submit')
 const cors = require('cors')
 
 app.use(cors({
-    origin:process.env.BASEURL,
-    credentials:true
+    origin: process.env.BASEURL,
+    credentials: true
 }))
 
-
-app.get('/', (req, res) => {
-  res.send('Server is running!');
+app.get("/", (req, res) => {
+    res.status(200).json({
+        status: "success",
+        message: "Backend API is running 🚀"
+    });
 });
 
 app.use(express.json());
 app.use(cookieParser())
 app.use('/user', authRouter)
 app.use('/problem', problemRouter)
-app.use('/submission',submitRouter)
+app.use('/submission', submitRouter)
 
 const InitalizeConnection = async () => {
     try {
@@ -31,9 +33,9 @@ const InitalizeConnection = async () => {
         await Promise.all([main(), redisClient.connect()]);
         console.log("DB Connected");
 
-        app.listen(process.env.PORT, () => {
-            console.log("Server listening at port number: " + process.env.PORT);
-        })
+        // app.listen(process.env.PORT, () => {
+        //     console.log("Server listening at port number: " + process.env.PORT);
+        // })
 
     }
     catch (err) {
