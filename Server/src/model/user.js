@@ -31,10 +31,14 @@ const userSchema = new Schema({
         enum: ['user', 'admin'],
         default: 'user',
     },
-    plans:{
-        type:String,
-        lowercase:true,
-        default:'free'
+    plans: {
+        type: String,
+        lowercase: true,
+        default: 'free'
+    },
+    photo: {
+        public_id: String,
+        url: String
     },
     problemSolved: {
         type: [{

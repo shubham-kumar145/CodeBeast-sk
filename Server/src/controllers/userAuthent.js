@@ -21,9 +21,11 @@ const register = async (req, res) => {
 
         const reply = {
             firstName: user.firstName,
+            lastName: user.lastName,
             emailId: user.emailId,
             _id: user._id,
             plans: user.plans,
+            age: user.age,
             role: user.role
         }
         const token = jwt.sign({ _id: user._id, emailId: emailId, role: 'user' }, process.env.JWT_KEY, { expiresIn: 60 * 60 })
@@ -58,9 +60,12 @@ const login = async (req, res) => {
         }
         const reply = {
             firstName: user.firstName,
+            lastName: user.lastName,
             emailId: user.emailId,
             _id: user._id,
             plans: user.plans,
+            age: user.age,
+            photo: req.result.photo.url,
             role: user.role
         }
         const token = jwt.sign({ _id: user._id, emailId: emailId, role: user.role }, process.env.JWT_KEY, { expiresIn: 60 * 60 })
@@ -105,13 +110,49 @@ const adminRegister = async (req, res) => {
     }
 }
 
-const profileupdate = async (req, res) => {
+const cloudinary = require("cloudinary").v2 //3
 
-    
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET
+});
+
+
+const profileupdate = async (req, res) => {
+    console.log('======================================');
+    console.log('@req.body');
+
+    console.log(res.body);
+    console.log('======================================');
+
+
     try {
+        if (!req.files || !req.files.photo) {
+            return res.status(400).json({ message: "Photo is required" });
+        }
+
+        // Upload to Cloudinary
+        const file = req.files.photo;
+        const result = await cloudinary.uploader.upload(file.tempFilePath, {
+            folder: process.env.CLOUD_PHOTO_FOLDER,
+        });
+        console.log('======================================');
+        console.log('======================================');
+        console.log('phoro result');
+        console.log(result);
+        console.log('======================================');
+
+
         let { id, firstName, lastName, age, emailId, old_password, new_password } = req.body;
 
         const user = await User.findById(id);
+        console.log('======================================');
+        console.log('user');
+        console.log(user);
+        console.log('======================================');
+
+
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -121,18 +162,31 @@ const profileupdate = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        req.body.emailId = user.emailId;
-        req.body.role = user.role;
-        req.body.plans = user.plans;
-
-        if (new_password) {
-            req.body.password = await bcrypt.hash(new_password, 10);
-        } else {
-            req.body.password = user.password;
+        // Keep existing details
+        const userdeatilsdata = {
+            firstName,
+            lastName,
+            age,
+            emailId: user.emailId, // don’t allow email change here
+            role: user.role,
+            plans: user.plans,
+            password: new_password ? await bcrypt.hash(new_password, 10) : user.password,
+            photo: {
+                public_id: result.public_id,
+                url: result.secure_url,
+            }
         }
+        console.log('======================================');
+        console.log(userdeatilsdata);
+        console.log('======================================');
 
-        const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });     
-        
+
+        const updatedUser = await User.findByIdAndUpdate(id, userdeatilsdata, { new: true });
+        console.log('======================================');
+        console.log(updatedUser);
+        console.log('======================================');
+
+
         res.status(200).json({ message: 'Profile updated', user: updatedUser });
 
     } catch (err) {
@@ -140,6 +194,44 @@ const profileupdate = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+
+
+// const profileupdate = async (req, res) => {
+
+
+//     try {
+//         let { id, firstName, lastName, age, emailId, old_password, new_password } = req.body;
+
+//         const user = await User.findById(id);
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+
+//         const match = await bcrypt.compare(old_password, user.password);
+//         if (!match) {
+//             return res.status(401).json({ message: 'Invalid credentials' });
+//         }
+
+//         req.body.emailId = user.emailId;
+//         req.body.role = user.role;
+//         req.body.plans = user.plans;
+
+//         if (new_password) {
+//             req.body.password = await bcrypt.hash(new_password, 10);
+//         } else {
+//             req.body.password = user.password;
+//         }
+
+//         const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
+
+//         res.status(200).json({ message: 'Profile updated', user: updatedUser });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ message: 'Server error', error: err.message });
+//     }
+// };
 
 const deleteprofile = async (req, res) => {
     try {
@@ -184,4 +276,4 @@ const alluserdata = async (req, res) => {
     }
 };
 
-module.exports = { login, register, logout, adminRegister, alluserdata, deleteprofile, deleteuser,profileupdate }
+module.exports = { login, register, logout, adminRegister, alluserdata, deleteprofile, deleteuser, profileupdate }

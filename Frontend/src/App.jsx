@@ -15,6 +15,7 @@ import AdminDeletePage from "./components/AdminDeletePage";
 import ComingSoon from "./page/ComingSoon";
 import AdminUpdateform from "./components/Adminupdateform";
 import Profilepage from "./page/Profilepage";
+import UpdateProfilePage from "./page/UpdateProfilePage";
 function App() {
 
   const { isAuthenticated, user, loading } = useSelector((state) => state.auth)
@@ -52,8 +53,9 @@ function App() {
         <Route path="/admin/update" element={<AdminUpdate />} />
         <Route path="/admin/signup" element={<AdminSignUp />} />
         <Route path="/admin/delete/user" element={<AdminDeletePage />} />
-        <Route path="/admin/update/form/:id" element={<AdminUpdateform/>}/>
-        <Route path="/profile" element={<Profilepage/>}/>
+        <Route path="/admin/update/form/:id" element={<AdminUpdateform />} />
+        <Route path="/profile" element={<Profilepage />} />
+        <Route path="/profile/update" element={<UpdateProfilePage />} />
       </Routes>
 
 
